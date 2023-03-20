@@ -1,5 +1,7 @@
 echo "\nrunning unit tests\n"
-cd contract
+cd nft
+cargo test
+cd ../token-receiver
 cargo test
 cd ..
 
