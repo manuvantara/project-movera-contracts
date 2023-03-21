@@ -1,7 +1,7 @@
 echo "\nrunning unit tests\n"
 cd nft
 cargo test
-cd ../token-receiver
+cd ../workshop
 cargo test
 cd ..
 

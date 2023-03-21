@@ -1,5 +1,5 @@
 [package]
-name = "token-receiver"
+name = "workshop"
 version = "1.0.0"
 authors = ["me <catangent346@gmail.com>"]
 edition = "2021"

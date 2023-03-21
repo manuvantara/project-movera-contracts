@@ -1342,15 +1342,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "token-receiver"
-version = "1.0.0"
-dependencies = [
- "near-contract-standards",
- "near-sdk",
- "uint",
-]
-
-[[package]]
 name = "toml"
 version = "0.5.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1540,6 +1531,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "23d020b441f92996c80d94ae9166e8501e59c7bb56121189dc9eab3bd8216966"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "workshop"
+version = "1.0.0"
+dependencies = [
+ "near-contract-standards",
+ "near-sdk",
+ "uint",
 ]
 
 [[package]]

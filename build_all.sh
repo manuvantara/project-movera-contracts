@@ -1,5 +1,5 @@
 cd nft
 ./build.sh
-cd ../token-receiver
+cd ../workshop
 ./build.sh
 cd ..

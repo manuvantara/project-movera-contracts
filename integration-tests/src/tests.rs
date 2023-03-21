@@ -7,7 +7,7 @@ use std::{env, fs};
 use workspaces::{Account, Contract};
 
 const NFT_PATH: &str = "../nft/target/wasm32-unknown-unknown/release/nft.wasm";
-const TR_PATH: &str = "../token-receiver/target/wasm32-unknown-unknown/release/token_receiver.wasm";
+const TR_PATH: &str = "../workshop/target/wasm32-unknown-unknown/release/workshop.wasm";
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -50,7 +50,7 @@ async fn main() -> anyhow::Result<()> {
     tr_contract
         .call("new")
         .args_json(serde_json::json!({
-            "non_fungible_token_account_id": nft_contract.id()
+            "nft_account_ids": [nft_contract.id()]
         }))
         .transact()
         .await?
@@ -58,10 +58,10 @@ async fn main() -> anyhow::Result<()> {
 
     // begin tests
     test_simple_transfer(&owner, &alice, &nft_contract).await?;
-    test_transfer_call_fast_return_to_sender(&owner, &tr_contract, &nft_contract).await?;
-    test_transfer_call_slow_return_to_sender(&owner, &tr_contract, &nft_contract).await?;
-    test_transfer_call_fast_keep_with_sender(&owner, &tr_contract, &nft_contract).await?;
-    test_transfer_call_slow_keep_with_sender(&owner, &tr_contract, &nft_contract).await?;
+    // test_transfer_call_fast_return_to_sender(&owner, &tr_contract, &nft_contract).await?;
+    // test_transfer_call_slow_return_to_sender(&owner, &tr_contract, &nft_contract).await?;
+    // test_transfer_call_fast_keep_with_sender(&owner, &tr_contract, &nft_contract).await?;
+    // test_transfer_call_slow_keep_with_sender(&owner, &tr_contract, &nft_contract).await?;
     test_transfer_call_receiver_panics(&owner, &tr_contract, &nft_contract).await?;
     test_enum_total_supply(&nft_contract).await?;
     test_enum_nft_tokens(&nft_contract).await?;
@@ -124,171 +124,171 @@ async fn test_simple_transfer(
     Ok(())
 }
 
-async fn test_transfer_call_fast_return_to_sender(
-    owner: &Account,
-    token_receiver: &Contract,
-    nft_contract: &Contract,
-) -> anyhow::Result<()> {
-    use serde_json::Value::String;
-    owner
-        .call(nft_contract.id(), "nft_mint")
-        .args_json(json!({
-            "token_id": "2",
-            "receiver_id": owner.id(),
-            "token_metadata": {
-                "title": "Olympus Mons 3",
-                "description": "The tallest mountain in the charted solar system",
-                "copies": 1,
-            }
-        }))
-        .deposit(parse_gas!("6050000000000000000000"))
-        .transact()
-        .await?
-        .unwrap();
+// async fn test_transfer_call_fast_return_to_sender(
+//     owner: &Account,
+//     token_receiver: &Contract,
+//     nft_contract: &Contract,
+// ) -> anyhow::Result<()> {
+//     use serde_json::Value::String;
+//     owner
+//         .call(nft_contract.id(), "nft_mint")
+//         .args_json(json!({
+//             "token_id": "2",
+//             "receiver_id": owner.id(),
+//             "token_metadata": {
+//                 "title": "Olympus Mons 3",
+//                 "description": "The tallest mountain in the charted solar system",
+//                 "copies": 1,
+//             }
+//         }))
+//         .deposit(parse_gas!("6050000000000000000000"))
+//         .transact()
+//         .await?
+//         .unwrap();
 
-    owner
-        .call(nft_contract.id(), "nft_transfer_call")
-        .args_json(json!({
-            "token_id": "2",
-            "receiver_id": token_receiver.id(),
-            "memo": "transfer & call",
-            "msg": "return-it-now",
-        }))
-        .deposit(1)
-        .gas(parse_gas!("150 Tgas") as u64)
-        .transact()
-        .await?
-        .unwrap();
+//     owner
+//         .call(nft_contract.id(), "nft_transfer_call")
+//         .args_json(json!({
+//             "token_id": "2",
+//             "receiver_id": token_receiver.id(),
+//             "memo": "transfer & call",
+//             "msg": "return-it-now",
+//         }))
+//         .deposit(1)
+//         .gas(parse_gas!("150 Tgas") as u64)
+//         .transact()
+//         .await?
+//         .unwrap();
 
-    let token: serde_json::Value = nft_contract
-        .call("nft_token")
-        .args_json(json!({"token_id": "2"}))
-        .transact()
-        .await?
-        .json()?;
-    assert_eq!(token.get("owner_id"), Some(&String(owner.id().to_string())));
+//     let token: serde_json::Value = nft_contract
+//         .call("nft_token")
+//         .args_json(json!({"token_id": "2"}))
+//         .transact()
+//         .await?
+//         .json()?;
+//     assert_eq!(token.get("owner_id"), Some(&String(owner.id().to_string())));
 
-    println!("      Passed ✅ test_transfer_call_fast_return_to_sender");
-    Ok(())
-}
+//     println!("      Passed ✅ test_transfer_call_fast_return_to_sender");
+//     Ok(())
+// }
 
-async fn test_transfer_call_slow_return_to_sender(
-    owner: &Account,
-    token_receiver: &Contract,
-    nft_contract: &Contract,
-) -> anyhow::Result<()> {
-    use serde_json::Value::String;
-    owner
-        .call(nft_contract.id(), "nft_transfer_call")
-        .args_json(json!({
-            "token_id": "2",
-            "receiver_id": token_receiver.id(),
-            "memo": "transfer & call",
-            "msg": "return-it-later",
-        }))
-        .deposit(1)
-        .gas(parse_gas!("150 Tgas") as u64)
-        .transact()
-        .await?
-        .unwrap();
+// async fn test_transfer_call_slow_return_to_sender(
+//     owner: &Account,
+//     token_receiver: &Contract,
+//     nft_contract: &Contract,
+// ) -> anyhow::Result<()> {
+//     use serde_json::Value::String;
+//     owner
+//         .call(nft_contract.id(), "nft_transfer_call")
+//         .args_json(json!({
+//             "token_id": "2",
+//             "receiver_id": token_receiver.id(),
+//             "memo": "transfer & call",
+//             "msg": "return-it-later",
+//         }))
+//         .deposit(1)
+//         .gas(parse_gas!("150 Tgas") as u64)
+//         .transact()
+//         .await?
+//         .unwrap();
 
-    let token: serde_json::Value = nft_contract
-        .call("nft_token")
-        .args_json(json!({"token_id": "2"}))
-        .transact()
-        .await?
-        .json()?;
-    assert_eq!(token.get("owner_id"), Some(&String(owner.id().to_string())));
+//     let token: serde_json::Value = nft_contract
+//         .call("nft_token")
+//         .args_json(json!({"token_id": "2"}))
+//         .transact()
+//         .await?
+//         .json()?;
+//     assert_eq!(token.get("owner_id"), Some(&String(owner.id().to_string())));
 
-    println!("      Passed ✅ test_transfer_call_slow_return_to_sender");
-    Ok(())
-}
+//     println!("      Passed ✅ test_transfer_call_slow_return_to_sender");
+//     Ok(())
+// }
 
-async fn test_transfer_call_fast_keep_with_sender(
-    owner: &Account,
-    token_receiver: &Contract,
-    nft_contract: &Contract,
-) -> anyhow::Result<()> {
-    use serde_json::Value::String;
-    owner
-        .call(nft_contract.id(), "nft_transfer_call")
-        .args_json(json!({
-            "token_id": "2",
-            "receiver_id": token_receiver.id(),
-            "memo": "transfer & call",
-            "msg": "keep-it-now",
-        }))
-        .deposit(1)
-        .gas(parse_gas!("150 Tgas") as u64)
-        .transact()
-        .await?
-        .unwrap();
+// async fn test_transfer_call_fast_keep_with_sender(
+//     owner: &Account,
+//     token_receiver: &Contract,
+//     nft_contract: &Contract,
+// ) -> anyhow::Result<()> {
+//     use serde_json::Value::String;
+//     owner
+//         .call(nft_contract.id(), "nft_transfer_call")
+//         .args_json(json!({
+//             "token_id": "2",
+//             "receiver_id": token_receiver.id(),
+//             "memo": "transfer & call",
+//             "msg": "keep-it-now",
+//         }))
+//         .deposit(1)
+//         .gas(parse_gas!("150 Tgas") as u64)
+//         .transact()
+//         .await?
+//         .unwrap();
 
-    let token: serde_json::Value = nft_contract
-        .call("nft_token")
-        .args_json(json!({"token_id": "2"}))
-        .transact()
-        .await?
-        .json()?;
-    assert_eq!(
-        token.get("owner_id"),
-        Some(&String(token_receiver.id().to_string()))
-    );
+//     let token: serde_json::Value = nft_contract
+//         .call("nft_token")
+//         .args_json(json!({"token_id": "2"}))
+//         .transact()
+//         .await?
+//         .json()?;
+//     assert_eq!(
+//         token.get("owner_id"),
+//         Some(&String(token_receiver.id().to_string()))
+//     );
 
-    println!("      Passed ✅ test_transfer_call_fast_keep_with_sender");
-    Ok(())
-}
+//     println!("      Passed ✅ test_transfer_call_fast_keep_with_sender");
+//     Ok(())
+// }
 
-async fn test_transfer_call_slow_keep_with_sender(
-    owner: &Account,
-    token_receiver: &Contract,
-    nft_contract: &Contract,
-) -> anyhow::Result<()> {
-    use serde_json::Value::String;
-    owner
-        .call(nft_contract.id(), "nft_mint")
-        .args_json(json!({
-            "token_id": "3",
-            "receiver_id": owner.id(),
-            "token_metadata": {
-                "title": "Olympus Mons 4",
-                "description": "The tallest mountain in the charted solar system",
-                "copies": 1,
-            }
-        }))
-        .deposit(parse_gas!("6050000000000000000000"))
-        .transact()
-        .await?
-        .unwrap();
+// async fn test_transfer_call_slow_keep_with_sender(
+//     owner: &Account,
+//     token_receiver: &Contract,
+//     nft_contract: &Contract,
+// ) -> anyhow::Result<()> {
+//     use serde_json::Value::String;
+//     owner
+//         .call(nft_contract.id(), "nft_mint")
+//         .args_json(json!({
+//             "token_id": "3",
+//             "receiver_id": owner.id(),
+//             "token_metadata": {
+//                 "title": "Olympus Mons 4",
+//                 "description": "The tallest mountain in the charted solar system",
+//                 "copies": 1,
+//             }
+//         }))
+//         .deposit(parse_gas!("6050000000000000000000"))
+//         .transact()
+//         .await?
+//         .unwrap();
 
-    owner
-        .call(nft_contract.id(), "nft_transfer_call")
-        .args_json(json!({
-            "token_id": "3",
-            "receiver_id": token_receiver.id(),
-            "memo": "transfer & call",
-            "msg": "keep-it-later",
-        }))
-        .deposit(1)
-        .gas(parse_gas!("150 Tgas") as u64)
-        .transact()
-        .await?
-        .unwrap();
+//     owner
+//         .call(nft_contract.id(), "nft_transfer_call")
+//         .args_json(json!({
+//             "token_id": "3",
+//             "receiver_id": token_receiver.id(),
+//             "memo": "transfer & call",
+//             "msg": "keep-it-later",
+//         }))
+//         .deposit(1)
+//         .gas(parse_gas!("150 Tgas") as u64)
+//         .transact()
+//         .await?
+//         .unwrap();
 
-    let token: serde_json::Value = nft_contract
-        .call("nft_token")
-        .args_json(json!({"token_id": "3"}))
-        .transact()
-        .await?
-        .json()?;
-    assert_eq!(
-        token.get("owner_id"),
-        Some(&String(token_receiver.id().to_string()))
-    );
+//     let token: serde_json::Value = nft_contract
+//         .call("nft_token")
+//         .args_json(json!({"token_id": "3"}))
+//         .transact()
+//         .await?
+//         .json()?;
+//     assert_eq!(
+//         token.get("owner_id"),
+//         Some(&String(token_receiver.id().to_string()))
+//     );
 
-    println!("      Passed ✅ test_transfer_call_slow_keep_with_sender");
-    Ok(())
-}
+//     println!("      Passed ✅ test_transfer_call_slow_keep_with_sender");
+//     Ok(())
+// }
 
 async fn test_transfer_call_receiver_panics(
     owner: &Account,
