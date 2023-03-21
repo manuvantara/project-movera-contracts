@@ -1,4 +1,4 @@
-near-blank-project
+project-movera-contracts
 ==================
 
 This app was initialized with [create-near-app]
@@ -12,13 +12,13 @@ If you haven't installed dependencies during setup:
     npm install
 
 
-Build and deploy your contract to TestNet with a temporary dev account:
+Build and deploy all contracts to TestNet with temporary dev accounts:
 
-    npm run deploy
+    ./deploy_all.sh
 
-Test your contract:
+Test your contracts (includes unit tests and integration tests, which in turn spin up sandbox i.e. localnet automatically):
 
-    npm test
+    ./test_all.sh
 
 If you have a frontend, run `npm start`. This will run a dev server.
 
@@ -31,15 +31,14 @@ Exploring The Code
 2. The frontend code lives in the `/frontend` folder. `/frontend/index.html` is a great
    place to start exploring. Note that it loads in `/frontend/index.js`,
    this is your entrypoint to learn how the frontend connects to the NEAR blockchain.
-3. Test your contract: `npm test`, this will run the tests in `integration-tests` directory.
 
 
 Deploy
 ======
 
 Every smart contract in NEAR has its [own associated account][NEAR accounts]. 
-When you run `npm run deploy`, your smart contract gets deployed to the live NEAR TestNet with a temporary dev account.
-When you're ready to make it permanent, here's how:
+When you run `./deploy_all.sh`, your smart contracts get deployed to the live NEAR TestNet with temporary dev accounts.
+When you're ready to make them permanent, here's how:
 
 
 Step 0: Install near-cli (optional)
@@ -54,7 +53,7 @@ Or, if you'd rather use the locally-installed version, you can prefix all `near`
 Ensure that it's installed with `near --version` (or `npx near --version`)
 
 
-Step 1: Create an account for the contract
+Step 1: Create an account for the paricullar contract
 ------------------------------------------
 
 Each account on NEAR can have at most one contract deployed to it. If you've already created an account such as `your-name.testnet`, you can deploy your contract to `near-blank-project.your-name.testnet`. Assuming you've already created an account on [NEAR Wallet], here's how to create `near-blank-project.your-name.testnet`:
